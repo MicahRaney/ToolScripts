@@ -1,0 +1,71 @@
+#!/bin/sh
+#TRASH_DIR=~/Documents/trashtest
+TRASH_DIR=~/.local/share/Trash
+#VERBOSE="TRUE"
+
+generateTrashinfo () {
+
+	echo [Trash Info]
+	echo Path=$(pwd)/$1
+	echo DeletionDate=$(date +%FT%H:%M:%S)
+
+}
+
+printTrashinfo () {
+
+	verbosePrint "Generating trashfile for $1 to $2"
+	generateTrashinfo $1 > $TRASH_DIR/info/$2.trashinfo
+
+}
+
+trash () {
+
+	printTrashinfo $1 $2
+	verbosePrint "Trashing $1 to $2..."
+	mv $1 $TRASH_DIR/files/$2
+
+}
+
+
+getSafeName () {
+
+	ret=$1
+
+	ret="$(rafs $ret)"
+	#/*clean="$(echo $ret | tr -d /)"
+	#echo $clean
+	#if [ $clean != "$ret" ]; then
+	#	echo Invalid folder name! Don\'t append \'\\\' char!
+	#	exit
+	#fi	
+
+	while [ -e  "$TRASH_DIR/info/$ret.trashinfo" ] || [ -f "$TRASH_DIR/files/$1.trashinfo" ]; do
+		i=$(($i+1))
+		ret="$1.$i"
+	done
+	echo $ret
+
+}
+
+
+verbosePrint () {
+
+	if [ "$VERBOSE" = "TRUE" ]; then
+		echo $1
+	fi
+
+}
+
+while [ -n "$1" ]; do
+
+	if [ -e "$1" ]; then
+
+		out=$(getSafeName $1)
+		trash $1 $out
+	else
+		echo $1: File/Folder not found! > /dev/stderr
+	fi
+
+	shift
+
+done

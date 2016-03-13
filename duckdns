@@ -1,0 +1,34 @@
+#!/bin/bash
+
+TOKEN="TOKEN"
+if [[ "$2" == "" ]]; then
+	echo "Usage: duck <up|down> <domain> [ip]"
+	exit
+fi
+DOMAIN="$2"
+
+if [[ "$3" != "" ]]; then
+#ip has been specified.
+IP="$3"
+fi
+
+if [[ "$1" == "up" ]]; then
+
+	echo "Domain $DOMAIN going up with ip $IP..."
+
+elif [[ "$1" == "down" ]]; then
+
+	echo Domain "$DOMAIN going down..."
+
+else
+	echo "Usage: duck <up|down> <domain> [ip]"
+fi
+
+SUCCESS=$(wget -qO - "duckdns.org/update?domains=$DOMAIN&token=$TOKEN&ip=$IP")
+echo "returned: $SUCCESS"
+
+if [[ "$SUCCESS" == "OK" ]]; then
+	echo "Success!"
+else
+	echo "Something happened..."
+fi
